@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>黑马旅游-搜索</title>
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" href="css/search.css">
+    <script src="js/jquery-3.3.1.js"></script>
+    <script src="js/getParameter.js"></script>
+    <script>
+        $(function () {
+            // 获取cid的值
+            var cid = getParameter("cid");
+            var rname = getParameter("rname");
+            rname = decodeURIComponent(rname);
+            // ajax加载页面信息
+            load(cid, rname, 1);
+        })
+
+        function load(cid, rname, currentPage) {
+            // 发送ajax请求，请求route/pageQuery
+            $.get("route/pageQuery", {cid: cid, rname: rname, currentPage: currentPage}, function (data) {
+                if (currentPage < 1) {
+                    currentPage =1;
+                }
+                if (currentPage > data.totalPage) {
+                    currentPage = data.totalPage;
+                }
+                var lis = '';
+                for (var i = 0; i < data.list.length; i++) {
+                    lis += '<li>\n' +
+                        '                            <div class="img"><img src="' + data.list[i].rimage + '" alt="" style="width: 299px"></div>\n' +
+                        '                            <div class="text1">\n' +
+                        '                                <p>' + data.list[i].rname + '</p>\n' +
+                        '                                <br/>\n' +
+                        '                                <p>' + data.list[i].routeIntroduce + '</p>\n' +
+                        '                            </div>\n' +
+                        '                            <div class="price">\n' +
+                        '                                <p class="price_num">\n' +
+                        '                                    <span>&yen;</span>\n' +
+                        '                                    <span>' + data.list[i].price + '</span>\n' +
+                        '                                    <span>起</span>\n' +
+                        '                                </p>\n' +
+                        '                                <p><a href="route_detail.html?rid=' + data.list[i].rid + '">查看详情</a></p>\n' +
+                        '                            </div>\n' +
+                        '                        </li>'
+                }
+                $("#route_ul").html(lis);
+
+                $("#page_num_inf").html('<i></i> 共\n' +
+                    '                        <span>' + data.totalPage + '</span>页<span>' + data.totalCount + '</span>条')
+
+                var beginPage = 0;
+                var endPage = 0;
+                if (currentPage - 4 < 1) {
+                    beginPage = 1;
+                    endPage = beginPage + 9 < data.totalPage ? 10 : data.totalPage;
+                } else if (currentPage + 5 > data.totalPage) {
+                    endPage = data.totalPage;
+                    beginPage = endPage - 9 > 0 ? endPage - 9 : 1;
+                } else {
+                    beginPage = currentPage - 4;
+                    endPage = currentPage + 5;
+                }
+
+                var pageBarLis = '<li onclick="load(' + cid + ', \'' + rname + '\', 1)"><a href="javascript:load(' +cid + ', \'' + rname + '\', 1)">首页</a></li>';
+                var beforePage = currentPage - 1 < 1 ? 1 : currentPage - 1;
+                pageBarLis += '<li class="threeword" onclick="load(' + cid + ', \'' + rname + '\', ' + beforePage +  ')"><a href="javascript:load(' + cid + ', \'' + rname + '\', ' +  beforePage + ')">上一页</a></li>';
+
+                for (var i = beginPage; i <= endPage ; i++) {
+                    if (i === currentPage) {
+                        pageBarLis += '<li onclick="load(' + cid + ', \'' + rname + '\', ' + i + ')" class="curPage"><a href="javascript:load(' + cid + ', \'' + rname + '\', ' + i +')">' + i + '</a></li>';
+                    } else {
+                        pageBarLis += '<li onclick="load(' + cid + ', \'' + rname + '\', ' + i + ')"><a href="javascript:load(' + cid + ', \'' + rname + '\', ' + i +')">' + i + '</a></li>';
+                    }
+                }
+                var nextPage = currentPage + 1 > data.totalPage ? data.totalPage : currentPage + 1;
+                pageBarLis += '<li class="threeword" onclick="load(' + cid + ', \'' + rname + '\', ' + nextPage +  ')"><a href="javascript:load(' + cid + ', \'' + rname + '\', ' +  nextPage + ')">下一页</a></li>';
+                pageBarLis += '<li onclick="load(' + cid + ', \'' + rname + '\', ' + data.totalPage + ')"><a href="javascript:load(' +cid + ', \'' + rname + '\', '+  data.totalPage +')">末页</a></li>';
+
+                $("#page_bar").html(pageBarLis);
+
+                window.scrollTo(0, 0);
+            });
+        }
+    </script>
+</head>
+<body>
+    <!--引入头部-->
+    <div id="header"></div>
+    <div class="page_one">
+        <div class="contant">
+            <div class="crumbs">
+                <img src="images/search.png" alt="">
+                <p>黑马旅行><span>搜索结果</span></p>
+            </div>
+            <div class="xinxi clearfix">
+                <div class="left">
+                    <div class="header">
+                        <span>商品信息</span>
+                        <span class="jg">价格</span>
+                    </div>
+                    <ul id="route_ul">
+
+                    </ul>
+                    <div class="page_num_inf" id="page_num_inf">
+
+                    </div>
+                    <div class="pageNum">
+                        <ul id="page_bar">
+                        </ul>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="top">
+                        <div class="hot">HOT</div>
+                        <span>热门推荐</span>
+                    </div>
+                    <ul>
+                        <li>
+                            <div class="left"><img src="images/04-search_09.jpg" alt=""></div>
+                            <div class="right">
+                                <p>清远新银盏温泉度假村酒店/自由行套...</p>
+                                <p>网付价<span>&yen;<span>899</span>起</span>
+                                </p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="left"><img src="images/04-search_09.jpg" alt=""></div>
+                            <div class="right">
+                                <p>清远新银盏温泉度假村酒店/自由行套...</p>
+                                <p>网付价<span>&yen;<span>899</span>起</span>
+                                </p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="left"><img src="images/04-search_09.jpg" alt=""></div>
+                            <div class="right">
+                                <p>清远新银盏温泉度假村酒店/自由行套...</p>
+                                <p>网付价<span>&yen;<span>899</span>起</span>
+                                </p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="left"><img src="images/04-search_09.jpg" alt=""></div>
+                            <div class="right">
+                                <p>清远新银盏温泉度假村酒店/自由行套...</p>
+                                <p>网付价<span>&yen;<span>899</span>起</span>
+                                </p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="left"><img src="images/04-search_09.jpg" alt=""></div>
+                            <div class="right">
+                                <p>清远新银盏温泉度假村酒店/自由行套...</p>
+                                <p>网付价<span>&yen;<span>899</span>起</span>
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--引入头部-->
+    <div id="footer"></div>
+    <!--导入布局js，共享header和footer-->
+    <script type="text/javascript" src="js/include.js"></script>
+</body>
+
+</html>
